@@ -12,7 +12,7 @@ global.access_token = '';
 
 const spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
 const spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-const spotify_redirect_uri = 'http://localhost:5000/auth/callback';
+const spotify_redirect_uri = 'https://randomradio.azurewebsites.net/auth/callback';
 
 var generateRandomString = function(length) {
   var text = '';
