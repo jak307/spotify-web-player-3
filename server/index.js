@@ -7,7 +7,7 @@ const path = require('path');
 
 dotenv.config();
 
-const port = 5000;
+const port = process.env.PORT || 5000;;
 global.access_token = '';
 
 const spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
