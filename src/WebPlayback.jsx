@@ -32,14 +32,20 @@ function WebPlayback(props) {
   const [isAutoplayPanelVisible, setAutoplayPanelVisible] = useState(false);
   const [isPlayerReady, setPlayerReady] = useState(false);
 
-  const [spotifyToken, setSpotifyToken] = useState(initialTokenValue);
+  const [spotifyToken, setSpotifyToken] = useState(props.token || '');
 
   const updateToken = (newToken) => {
     setSpotifyToken(newToken);
   };
 
-  const fetchWithTokenHandling = async (url, options) => {
+  const fetchWithTokenHandling = async (url, options = {}) => {
+    options.headers = {
+      ...options.headers,
+      'Authorization': `Bearer ${spotifyToken}`
+    };
+
     let response = await fetch(url, options);
+
     if (response.status === 401) {
       const refreshResponse = await fetch('/auth/refresh_token');
       if (refreshResponse.ok) {
@@ -49,6 +55,7 @@ function WebPlayback(props) {
         response = await fetch(url, options);
       }
     }
+
     return response;
   };
   
@@ -68,7 +75,7 @@ function WebPlayback(props) {
       if (!spotifyPlayerInstance) {
         spotifyPlayerInstance = new window.Spotify.Player({
           name: 'Web Playback SDK',
-          getOAuthToken: cb => { cb(props.token); },
+          getOAuthToken: cb => { cb(spotifyToken); },
           volume: 0.5
         });
 
@@ -96,7 +103,7 @@ function WebPlayback(props) {
       }
       setPlayer(spotifyPlayerInstance);
     };
-  }, [props.token, setPlayerReady]);
+  }, [spotifyToken, setPlayerReady]);
 
   const transferPlaybackHere = useCallback(async (device_id) => {
     try {
@@ -105,7 +112,7 @@ function WebPlayback(props) {
         body: JSON.stringify({ device_ids: [device_id], play: false }),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${props.token}`
+          'Authorization': `Bearer ${spotifyToken}`
         }
       });
       if (!response.ok) {
@@ -115,7 +122,7 @@ function WebPlayback(props) {
     } catch (error) {
       console.error('Error transferring playback:', error);
     }
-  }, [props.token]);  
+  }, [spotifyToken]);  
 
   useEffect(() => {
     async function fetchRecommendedSongs() {
@@ -137,7 +144,7 @@ function WebPlayback(props) {
       }
     }    
 
-    if (player && props.token) {
+    if (player && spotifyToken) {
       fetchRecommendedSongs();
     }
   }, [player, props.token]);
@@ -190,7 +197,7 @@ function WebPlayback(props) {
       body: JSON.stringify({ uris: [spotifyUri] }),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${props.token}`
+        'Authorization': `Bearer ${spotifyToken}`
       }
     });
     setSessionHistory(prevHistory => [...prevHistory, trackId]);
@@ -285,7 +292,7 @@ function WebPlayback(props) {
       body: JSON.stringify({ uris: [spotifyUri] }),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${props.token}`
+        'Authorization': `Bearer ${spotifyToken}`
       }
     }).then(response => {
       if (!response.ok) {
@@ -326,7 +333,7 @@ function WebPlayback(props) {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${props.token}`
+            'Authorization': `Bearer ${spotifyToken}`
           }
         });
         if (response.ok) {
