@@ -66,35 +66,6 @@ app.get('/auth/callback', (req, res) => {
   });
 });
 
-app.get('/auth/refresh_token', (req, res) => {
-  const refresh_token = req.query.refresh_token;
-  const authOptions = {
-    url: 'https://accounts.spotify.com/api/token',
-    headers: {
-      'Authorization': 'Basic ' + (Buffer.from(spotify_client_id + ':' + spotify_client_secret).toString('base64')),
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    form: {
-      grant_type: 'refresh_token',
-      refresh_token: refresh_token
-    },
-    json: true
-  };
-
-  request.post(authOptions, function(error, response, body) {
-  if (!error && response.statusCode === 200) {
-    const access_token = body.access_token;
-    const expires_in = body.expires_in;
-    const expiryTime = new Date().getTime() + expires_in * 1000; // converting to milliseconds
-
-    // Send the expiry time along with the access token to the frontend
-    res.json({
-      'access_token': access_token,
-      'expires_at': expiryTime
-    });
-  }
-});
-
 app.get('/top-tracks', async (req, res) => {
   const randomOffset = Math.floor(Math.random() * 50);
 
