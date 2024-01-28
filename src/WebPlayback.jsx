@@ -31,6 +31,42 @@ function WebPlayback(props) {
   const [autoplayType, setAutoplayType] = useState("similar");
   const [isAutoplayPanelVisible, setAutoplayPanelVisible] = useState(false);
   const [isPlayerReady, setPlayerReady] = useState(false);
+  
+  const [accessToken, setAccessToken] = useState(null);
+  const [tokenExpiry, setTokenExpiry] = useState(null);
+  
+  const setToken = (token, expiryTime) => {
+    setAccessToken(token);
+    setTokenExpiry(expiryTime);
+  };
+
+  const isTokenExpired = () => {
+    return new Date().getTime() > tokenExpiry;
+  };
+
+  const refreshToken = async () => {
+    try {
+      const response = await fetch(`/auth/refresh_token?refresh_token=${your_refresh_token}`);
+      const data = await response.json();
+      if (data.access_token) {
+        // Update the access token in your state/context
+        props.setToken(data.access_token);
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (isTokenExpired()) {
+        refreshToken(); // Replace this with your actual token refresh logic
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [tokenExpiry]);
+
 
   useEffect(() => {
     if (!window.Spotify) {
