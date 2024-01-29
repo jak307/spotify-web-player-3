@@ -61,7 +61,32 @@ app.get('/auth/callback', (req, res) => {
   request.post(authOptions, function(error, response, body) {
     if (!error && response.statusCode === 200) {
       access_token = body.access_token;
+      refresh_token = body.refresh_token;
       res.redirect('/');
+    }
+  });
+});
+
+app.get('/auth/refresh_token', (req, res) => {
+  var refreshOptions = {
+    url: 'https://accounts.spotify.com/api/token',
+    headers: {
+      'Authorization': 'Basic ' + (Buffer.from(spotify_client_id + ':' + spotify_client_secret).toString('base64')),
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    form: {
+      grant_type: 'refresh_token',
+      refresh_token: refresh_token
+    },
+    json: true
+  };
+
+  request.post(refreshOptions, function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+      access_token = body.access_token;
+      res.json({ access_token: access_token });
+    } else {
+      res.status(response.statusCode).json({ error: 'Failed to refresh token' });
     }
   });
 });
