@@ -32,33 +32,6 @@ function WebPlayback(props) {
   const [isAutoplayPanelVisible, setAutoplayPanelVisible] = useState(false);
   const [isPlayerReady, setPlayerReady] = useState(false);
 
-  const [spotifyToken, setSpotifyToken] = useState(props.token || '');
-
-  const updateToken = (newToken) => {
-    setSpotifyToken(newToken);
-  };
-
-  const fetchWithTokenHandling = async (url, options = {}) => {
-    options.headers = {
-      ...options.headers,
-      'Authorization': `Bearer ${spotifyToken}`
-    };
-
-    let response = await fetch(url, options);
-
-    if (response.status === 401) {
-      const refreshResponse = await fetch('/auth/refresh_token');
-      if (refreshResponse.ok) {
-        const { access_token } = await refreshResponse.json();
-        updateToken(access_token);
-        options.headers['Authorization'] = `Bearer ${access_token}`;
-        response = await fetch(url, options);
-      }
-    }
-
-    return response;
-  };
-  
   useEffect(() => {
     if (!window.Spotify) {
       console.log("Adding Spotify SDK script to the document");
@@ -75,7 +48,7 @@ function WebPlayback(props) {
       if (!spotifyPlayerInstance) {
         spotifyPlayerInstance = new window.Spotify.Player({
           name: 'Web Playback SDK',
-          getOAuthToken: cb => { cb(spotifyToken); },
+          getOAuthToken: cb => { cb(props.token); },
           volume: 0.5
         });
 
@@ -103,16 +76,16 @@ function WebPlayback(props) {
       }
       setPlayer(spotifyPlayerInstance);
     };
-  }, [spotifyToken, setPlayerReady]);
+  }, [props.token, setPlayerReady]);
 
   const transferPlaybackHere = useCallback(async (device_id) => {
     try {
-      const response = await fetchWithTokenHandling('https://api.spotify.com/v1/me/player', {
+      const response = await fetch('https://api.spotify.com/v1/me/player', {
         method: 'PUT',
         body: JSON.stringify({ device_ids: [device_id], play: false }),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${spotifyToken}`
+          'Authorization': `Bearer ${props.token}`
         }
       });
       if (!response.ok) {
@@ -122,20 +95,20 @@ function WebPlayback(props) {
     } catch (error) {
       console.error('Error transferring playback:', error);
     }
-  }, [spotifyToken]);  
+  }, [props.token]);  
 
   useEffect(() => {
     async function fetchRecommendedSongs() {
       try {
         console.log("Fetching recommended songs");
-        const topTrackResponse = await fetchWithTokenHandling('/top-tracks');
+        const topTrackResponse = await fetch('/top-tracks');
         const topTrackData = await topTrackResponse.json();
     
         if (!topTrackData || !topTrackData.id) {
           throw new Error('No top track found');
         }
     
-        const recommendationsResponse = await fetchWithTokenHandling(`/recommendations?seed_tracks=${topTrackData.id}`);
+        const recommendationsResponse = await fetch(`/recommendations?seed_tracks=${topTrackData.id}`);
         const recommendationsData = await recommendationsResponse.json();
     
         setRecommendedTracks(recommendationsData.tracks);
@@ -144,7 +117,7 @@ function WebPlayback(props) {
       }
     }    
 
-    if (player && spotifyToken) {
+    if (player && props.token) {
       fetchRecommendedSongs();
     }
   }, [player, props.token]);
@@ -166,7 +139,7 @@ function WebPlayback(props) {
   }, [player]);
 
   useEffect(() => {
-    fetchWithTokenHandling('/genre-seeds')
+    fetch('/genre-seeds')
       .then(response => response.json())
       .then(data => setGenres(data))
       .catch(console.error);
@@ -192,12 +165,12 @@ function WebPlayback(props) {
   function playTrack(spotifyUri, trackId) {
     console.log("Playing track", spotifyUri);
     setPlayedTracks(prevPlayedTracks => new Set(prevPlayedTracks).add(trackId));
-    fetchWithTokenHandling('https://api.spotify.com/v1/me/player/play', {
+    fetch('https://api.spotify.com/v1/me/player/play', {
       method: 'PUT',
       body: JSON.stringify({ uris: [spotifyUri] }),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${spotifyToken}`
+        'Authorization': `Bearer ${props.token}`
       }
     });
     setSessionHistory(prevHistory => [...prevHistory, trackId]);
@@ -220,7 +193,7 @@ function WebPlayback(props) {
     if (currentSeeds.length > 0) {
       const seed_tracks = currentSeeds.join(',');
       try {
-        const recommendationsResponse = await fetchWithTokenHandling(`/recommendations?seed_tracks=${seed_tracks}&limit=1`);
+        const recommendationsResponse = await fetch(`/recommendations?seed_tracks=${seed_tracks}&limit=1`);
         const recommendationsData = await recommendationsResponse.json();
   
         const recommendedTrack = recommendationsData.tracks.find(track => !playedTracks.has(track.id));
@@ -239,14 +212,14 @@ function WebPlayback(props) {
   const fetchAndPlayRandomTrack = async () => {
     try {
       console.log("Fetching random top track and its recommendation");
-      const topTrackResponse = await fetchWithTokenHandling('/top-tracks');
+      const topTrackResponse = await fetch('/top-tracks');
       const topTrackData = await topTrackResponse.json();
   
       if (!topTrackData || !topTrackData.id) {
         throw new Error('No top track found');
       }
   
-      const recommendationsResponse = await fetchWithTokenHandling(`/recommendations?seed_tracks=${topTrackData.id}&limit=1`);
+      const recommendationsResponse = await fetch(`/recommendations?seed_tracks=${topTrackData.id}&limit=1`);
       const recommendationsData = await recommendationsResponse.json();
 
       const recommendedTrack = recommendationsData.tracks.find(track => !playedTracks.has(track.id));
@@ -263,7 +236,7 @@ function WebPlayback(props) {
 
   const playRandomGenreTrack = async () => {
     const randomGenre = genres[Math.floor(Math.random() * genres.length)];
-    const recommendationsResponse = await fetchWithTokenHandling(`/recommendations?seed_genres=${randomGenre}&limit=1`);
+    const recommendationsResponse = await fetch(`/recommendations?seed_genres=${randomGenre}&limit=1`);
     const recommendationsData = await recommendationsResponse.json();  
     const recommendedTrack = recommendationsData.tracks[0];
     if (recommendedTrack) {
@@ -287,12 +260,12 @@ function WebPlayback(props) {
   function playTrackById(trackId) {
     const spotifyUri = `spotify:track:${trackId}`;
     console.log("Playing track by ID", trackId);
-    fetchWithTokenHandling('https://api.spotify.com/v1/me/player/play', {
+    fetch('https://api.spotify.com/v1/me/player/play', {
       method: 'PUT',
       body: JSON.stringify({ uris: [spotifyUri] }),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${spotifyToken}`
+        'Authorization': `Bearer ${props.token}`
       }
     }).then(response => {
       if (!response.ok) {
@@ -329,11 +302,11 @@ function WebPlayback(props) {
   const addToLibrary = async () => {
     if (current_track.id) {
       try {
-        const response = await fetchWithTokenHandling(`https://api.spotify.com/v1/me/tracks?ids=${current_track.id}`, {
+        const response = await fetch(`https://api.spotify.com/v1/me/tracks?ids=${current_track.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${spotifyToken}`
+            'Authorization': `Bearer ${props.token}`
           }
         });
         if (response.ok) {
