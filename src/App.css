@@ -179,3 +179,8 @@ label {
   font-size: 16px;
   color: white;
 }
+
+.spotify-logo {
+  width: 50px; 
+  height: auto;
+}
