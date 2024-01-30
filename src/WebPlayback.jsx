@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import spotifyLogo from './spotify_logo.png';
 
 const track = {
   name: "",
@@ -357,6 +358,12 @@ function WebPlayback(props) {
     <div className="loading-indicator">Loading...</div>
   );
 
+  const openSpotifyLink = (url) => {
+    console.log("Current track data:", current_track);
+    if (!url) return;
+    window.open(url, '_blank');
+  };  
+
   const AutoplaySettingsPanel = () => {
     return (
       <div className="autoplay-settings">
@@ -430,21 +437,22 @@ function WebPlayback(props) {
           )}
   
           {isRecommendationPlayed && (
-            <>
-              <div className="display-toggle">
-                <button className="btn-toggle-display" onClick={toggleDisplay}>
-                  {isDisplayVisible ? "Hide Display" : "Show Display"}
-                </button>
-              </div>
-  
+            <> 
               {isDisplayVisible && (
                 <div className="now-playing">
-                  <img src={current_track.album.images[0].url} className="now-playing__cover" alt="" />
-                  <div className="now-playing__info">
-                    <div className="now-playing__name">{current_track.name}</div>
-                    <div className="now-playing__artist">{current_track.artists[0].name}</div>
+                <img src={current_track.album.images[0].url} className="now-playing__cover" alt="" />
+                <div className="now-playing__info">
+                  <div className="now-playing__name">
+                    <a href={`https://open.spotify.com/track/${current_track.id}`} target="_blank" rel="noopener noreferrer">
+                      {current_track.name}
+                    </a>
                   </div>
+                  <div className="now-playing__artist">{current_track.artists[0].name}</div>
+                  <a href="https://www.spotify.com" target="_blank" rel="noopener noreferrer">
+                    <img src={spotifyLogo} alt="Spotify Logo" className="spotify-logo"/>
+                  </a>
                 </div>
+              </div>              
               )}
   
               <div>
