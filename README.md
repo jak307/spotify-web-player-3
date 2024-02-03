@@ -21,7 +21,7 @@ Fill in the app name, description, and agree to the terms.\
 Take note of the Client ID and Client Secret.\
 Click "Edit Settings" and add http://localhost:5000/auth/callback to the "Redirect URIs" section.
 
-# Installation
+## Installation
 Clone the repository to your local machine.\
 Navigate to the project directory.\
 Create a .env file in the root directory of your project. Add the following environment variables:
