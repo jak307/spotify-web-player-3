@@ -26,7 +26,7 @@ Clone the repository to your local machine.\
 Navigate to the project directory.\
 Create a .env file in the root directory of your project. Add the following environment variables:
 
-SPOTIFY_CLIENT_ID='your_spotify_client_id'
+SPOTIFY_CLIENT_ID='your_spotify_client_id'\
 SPOTIFY_CLIENT_SECRET='your_spotify_client_secret'
 
 Replace 'your_spotify_client_id' and 'your_spotify_client_secret' with the Client ID and Client Secret you obtained from your Spotify app settings.\
