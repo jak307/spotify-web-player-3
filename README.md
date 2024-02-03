@@ -11,7 +11,7 @@ Ability to refresh Spotify tokens
 ## Requirements
 Node.js\
 A Spotify Premium account\
-An application registered on the Spotify for Developers site\
+An application registered on the Spotify for Developers site
 # Setup
 ## Registering Your Application with Spotify
 Go to the Spotify Developer Dashboard.\
