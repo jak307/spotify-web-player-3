@@ -34,7 +34,7 @@ Install the required Node.js modules by running 'npm install'.\
 Build the frontend application by running 'npm run build'.\
 Start the backend server by running 'node server'.
 
-Usage
+# Usage
 Open your browser and navigate to http://localhost:5000.\
 Click the login link to authenticate with Spotify.\
 Once authenticated, you can view your top tracks, get music recommendations, and control playback.
