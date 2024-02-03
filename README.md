@@ -38,3 +38,14 @@ Start the backend server by running 'node server'.
 Open your browser and navigate to http://localhost:5000. \
 Click the login link to authenticate with Spotify.\
 Once authenticated, you can view your top tracks, get music recommendations, and control playback.
+
+# Contributing
+Contributions to the Spotify Integration App are welcome. \
+Please fork the repository and submit a pull request with your changes.
+
+#License
+CC0 1.0 Universal (CC0 1.0) Public Domain Dedication \
+
+The person who associated a work with this deed has dedicated the work to the public domain by waiving all of his or her rights to the work worldwide under copyright law, including all related and neighboring rights, to the extent allowed by law. \
+
+You can copy, modify, distribute, and perform the work, even for commercial purposes, all without asking permission. \
