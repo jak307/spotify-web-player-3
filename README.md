@@ -37,7 +37,7 @@ Start the backend server by running 'node server'.
 # Usage
 Open your browser and navigate to http://localhost:5000. \
 Click the login link to authenticate with Spotify.\
-Once authenticated, you can view your top tracks, get music recommendations, and control playback.
+Once authenticated, you can get music recommendations and control playback.
 
 # Contributing
 Contributions to the Spotify Integration App are welcome. \
